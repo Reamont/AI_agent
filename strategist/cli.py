@@ -4,11 +4,8 @@ import json
 import sys
 from pathlib import Path
 from . import engine, ingest, package
-from .store import Problem, load, init, checkpoint, transaction, unwrap, now
-
-
-def read_json(path):
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+from .store import Problem, load, init, checkpoint, transaction, unwrap, now, read_json
+from .validation import obj, workflow_errors
 
 
 def parser():
@@ -33,6 +30,10 @@ def parser():
     for cmd in ["claim", "decision", "promise", "strategy", "progress"]:
         a = sub.add_parser(cmd, help="Сохранить JSON-запись по контракту docs/tools.md")
         a.add_argument("file")
+        a.add_argument("--expected-revision", type=int)
+        if cmd in ("decision", "promise"):
+            a.add_argument("--update", action="store_true", help="Обновить запись с сохранением ID и истории")
+            a.add_argument("--reason", help="Обязательная причина обновления")
     a = sub.add_parser("analyze", help="Рассчитать удержание по CSV и проверить качество")
     a.add_argument("source_id")
     a = sub.add_parser("revise", help="Изменить статус утверждения и пересмотреть зависимости")
@@ -50,6 +51,11 @@ def parser():
     a = sub.add_parser("budget", help="Проверить/зарезервировать стоимость до действия")
     a.add_argument("--amount", type=float, help="Неизвестная стоимость блокируется")
     a.add_argument("--minutes", type=float, default=0)
+    a = sub.add_parser("account-time", help="Записать фактическое время с основанием, отдельно от резерва")
+    a.add_argument("--minutes", type=float, required=True)
+    a.add_argument("--description", required=True)
+    a.add_argument("--reference", required=True)
+    a.add_argument("--id", required=True)
     sub.add_parser("audit", help="Проверить состав пакета на секреты/ПДн (эвристика)")
     a = sub.add_parser("pack", help="Упаковать каталог --root и проверить манифест")
     a.add_argument("--root", default=".")
@@ -76,17 +82,24 @@ def run(a):
     if cmd == "fetch":
         return ingest.fetch(root, a.url, a.rights, a.contains)
     if cmd == "claim":
-        return engine.add_claim(root, read_json(a.file))
+        return engine.add_claim(root, read_json(a.file), a.expected_revision)
     if cmd in ("decision", "promise"):
-        return engine.add_record(root, {"decision": "decisions", "promise": "promises"}[cmd], read_json(a.file))
+        collection = {"decision": "decisions", "promise": "promises"}[cmd]
+        if a.update:
+            return engine.update_record(root, collection, read_json(a.file), a.reason, a.expected_revision)
+        return engine.add_record(root, collection, read_json(a.file), a.expected_revision)
     if cmd == "strategy":
-        return engine.set_strategy(root, read_json(a.file))
+        return engine.set_strategy(root, read_json(a.file), a.expected_revision)
     if cmd == "progress":
         update = read_json(a.file)
-        with transaction(root, "progress", "Обновить ход исследования") as s:
+        obj(update, "progress")
+        with transaction(root, "progress", "Обновить ход исследования", expected_revision=a.expected_revision) as s:
             if set(update) - set(s["workflow"]):
                 raise Problem("Неизвестное поле workflow")
             s["workflow"].update(update)
+            errors = workflow_errors(s["workflow"])
+            if errors:
+                raise Problem("; ".join(errors))
         return load(root)["workflow"]
     if cmd == "analyze":
         return engine.analyze(root, a.source_id)
@@ -100,6 +113,8 @@ def run(a):
         return engine.validate(root, a.strategy)
     if cmd == "budget":
         return engine.budget(root, a.amount, a.minutes)
+    if cmd == "account-time":
+        return engine.account_time(root, a.minutes, a.description, a.reference, a.id)
     if cmd == "export":
         return engine.export(root)
     if cmd == "audit":
@@ -108,7 +123,8 @@ def run(a):
         return package.pack(a.root, a.out)
     s = load(root)
     if cmd == "impact":
-        return {k: [r for r in s[k].values() if r["status"] == "needs_review"] for k in ("claims", "decisions", "promises")}
+        return {**{k: [r for r in s[k].values() if r["status"] == "needs_review"] for k in ("claims", "decisions", "promises")},
+                "strategy": [s["strategy"]] if s.get("strategy", {}) and s["strategy"]["status"] == "needs_review" else []}
     if cmd == "resume":
         v = engine.validate(root)
         if not v["valid"]:
@@ -124,21 +140,27 @@ def run(a):
 
 
 def main(argv=None):
+    import logging
+    # Библиотека может печатать фрагмент повреждённого PDF в warning. Контракт CLI
+    # возвращает только безопасную JSON-ошибку; структурные warnings — в результате.
+    logger = logging.getLogger("pypdf")
+    logger.addHandler(logging.NullHandler())
+    logger.propagate = False
     a = parser().parse_args(argv)
     try:
         result = run(a)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if isinstance(result, dict) and (result.get("valid") is False or result.get("allowed") is False):
             raise SystemExit(2)
-    except (Problem, OSError, ValueError, KeyError) as exc:
+    except Exception as exc:
         # Ошибки входных документов не должны раскрывать конфигурацию сети/секреты.
-        msg = str(exc) if isinstance(exc, Problem) else f"Некорректный ввод или файл ({type(exc).__name__})"
+        msg = str(exc) if isinstance(exc, Problem) else f"Ошибка ввода, документа или инструмента ({type(exc).__name__})"
         if (Path(a.project) / "state/project.json").exists():
             try:
                 with transaction(a.project, "error", "Зафиксировать неуспешный вызов", [a.command]) as s:
                     s["workflow"]["errors"].append({"at": now(), "tool": a.command, "message": msg, "status": "error"})
                     s["workflow"]["next_action"] = "Проверить ошибку инструмента; не выдумывать отсутствующий результат"
-            except (Problem, OSError, ValueError):
+            except Exception:
                 pass
         print(json.dumps({"error": msg, "status": "error"}, ensure_ascii=False), file=sys.stderr)
         raise SystemExit(2)

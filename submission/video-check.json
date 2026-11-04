@@ -1,0 +1,13 @@
+{
+  "status": "partial",
+  "at": "2026-11-04T11:17:59.530150+00:00",
+  "path": "walkthrough-cli.webm",
+  "duration_seconds": 40.0,
+  "under_ten_minutes": true,
+  "sha256": "59da7110d57dd1b7652bd9e00c8f252f3ad2fb3801a9dfef747f39c14e6a3069",
+  "kind": "Real Chromium frame capture with monotonic timestamps and system FFmpeg; actual CLI execution, replay of saved demo",
+  "ffmpeg_version": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "new_llm_chat_included": false,
+  "fulfills_full_submission": false,
+  "publication": "not published to an allowed video hosting service"
+}

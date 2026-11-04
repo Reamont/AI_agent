@@ -1,0 +1,13 @@
+{
+  "id": "P-CURRENT",
+  "basis": [
+    "C-AVAILABLE-V2"
+  ],
+  "status": "current",
+  "message": "Список задач и CSV",
+  "capability": "Список задач и выгрузка CSV; приглашение исключено",
+  "available": true,
+  "limitation": "Только учебный бриф; ручное приглашение недоступно",
+  "allowed_wording": "В учебной версии можно вести список задач и выгружать CSV.",
+  "review_note": "C-AVAILABLE-V2: точная цитата line:3; обещание приглашения удалено"
+}

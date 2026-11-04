@@ -7,6 +7,8 @@ from openpyxl import Workbook
 
 def create(folder):
     folder = Path(folder)
+    if folder.exists() and any(folder.iterdir()):
+        raise ValueError("Для фикстур нужна пустая папка; существующие материалы не изменены")
     folder.mkdir(parents=True, exist_ok=True)
     doc = Document()
     doc.add_heading("Учебный бриф: сервис командных задач «Контур задач»", 0)

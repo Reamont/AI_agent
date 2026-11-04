@@ -1,0 +1,24 @@
+{
+  "valid": true,
+  "traces": [
+    {
+      "path": "evals/llm-traces/continuation.jsonl",
+      "valid": true,
+      "errors": [],
+      "tool_calls": 14,
+      "new_input_after_resume": true,
+      "independent_new_chat": false,
+      "sha256": "e5a0ac3627cfee26a58da8548e17846cbb227de94fb5689d516a6daa5fe93fc2"
+    },
+    {
+      "path": "evals/llm-traces/second-task.jsonl",
+      "valid": true,
+      "errors": [],
+      "tool_calls": 4,
+      "new_input_after_resume": false,
+      "independent_new_chat": false,
+      "sha256": "11a4bed3d0e4b6b9089389a868afb038352e63a3f344957cfe6ba998ee2cc945"
+    }
+  ],
+  "scope": "Целостность входов/команд/результатов; LLM self-recorded, не provider transcript и не независимая оценка"
+}

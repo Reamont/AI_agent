@@ -277,7 +277,7 @@ class Workflow(unittest.TestCase):
         with self.assertRaises(Problem):
             pack(self.root, target)
 
-    def test_second_task_selects_other_question(self):
+    def test_workflow_persists_another_next_action(self):
         sid = self.source('Новый сегмент: библиотека. Барьер: непонятны права доступа.', 'library.md')
         results = engine.search(self.root, 'права доступа')
         self.assertEqual(results[0]['source_id'], sid)

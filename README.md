@@ -6,7 +6,7 @@
 Исполнитель исследования — **LLM среды**; Python CLI отвечает за данные, расчёты
 и память. Это не автономная платформа и не готовый SaaS.
 
-Версия: **0.1.0**. [Пакет сдачи](submission/README.md) · [Демо](projects/demo/README.md) ·
+Версия: **0.2.0**. [Пакет сдачи](submission/README.md) · [Демо](projects/demo/README.md) ·
 [Матрица требований](docs/requirements-matrix.md) · [Ограничения](docs/architecture.md).
 
 ## Быстрый старт
@@ -99,7 +99,7 @@ python -m strategist -p projects/demo impact
 python -m strategist -p projects/second resume
 python -m strategist -p projects/demo export
 python -m strategist -p . audit
-python -m strategist pack --root . --out /tmp/strategist-0.1.0.zip
+python -m strategist pack --root . --out /tmp/strategist-0.2.0.zip
 ```
 
 Код возврата 0 — успешный инструмент; 2 — ошибка, невалидные данные или остановка
@@ -111,3 +111,21 @@ python -m strategist pack --root . --out /tmp/strategist-0.1.0.zip
 Для пересоздания отчёта нужны отдельные зависимости `requirements-report.txt`,
 шрифт DejaVu Sans, системный Chromium либо браузер Playwright. Это необязательные
 зависимости рабочего агента. Команда и параметры: `python tools/report.py --help`.
+
+## Исправления по ревью — 0.2.0
+
+[Карта 33 замечаний](docs/review-fixes.md) указывает исправления, тесты и ограничения.
+Входы строго валидируются; CSV сверяет хеш до расчёта; граф учитывает контрсвидетельства,
+замену источников и обещания стратегии. Решения/обещания обновляются с тем же ID через
+--update --reason; обязательные поля — в [контрактах](docs/tools.md). impact показывает
+и стратегию. Точные текущие прогоны проверяются командой `python tools/check_traces.py`.
+Русские результаты: `python tools/render_outputs.py --project projects/demo`.
+
+Трассы в evals/llm-traces содержат реальные текущие входы, ответы и вызовы инструментов,
+но self-recorded, не независимый новый чат. Первоначальное обновление D30 было
+отложенной интерпретацией; capability-update действительно импортирован после resume.
+
+Для технической записи требуется системный FFmpeg/ffprobe (проверено 7.1.5) и Chromium:
+`python tools/record_walkthrough.py`. Реальная 40-секундная запись сохранена в
+submission/walkthrough-cli.webm. Она не включает новый чат и не заменяет полный ролик.
+Для финального размещения выбран Яндекс Диск; доступа на загрузку у среды нет.

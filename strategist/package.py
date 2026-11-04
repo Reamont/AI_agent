@@ -59,6 +59,14 @@ def pack(root, target):
     result = audit(root)
     if not result["valid"]:
         raise Problem("Пакет содержит возможные секреты/ПДн; смотрите audit")
+    from .engine import validate
+    readiness = []
+    for p in files(root):
+        if p.name == "project.json" and p.parent.name == "state":
+            check = validate(p.parent.parent)
+            readiness.append({"project": str(p.parent.parent.relative_to(root)), "valid": check["valid"], "warnings": check["warnings"]})
+            if not check["valid"]:
+                raise Problem("Упаковка остановлена: повреждено состояние " + str(p.relative_to(root)) + ": " + "; ".join(check["errors"]))
     manifest = {}
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as z:
@@ -72,4 +80,6 @@ def pack(root, target):
             raise Problem("Повреждённый архив")
         if any(digest(z.read(name)) != sha for name, sha in manifest.items()):
             raise Problem("Не совпали хеши архива")
-    return {"archive": str(target), "sha256": digest(target.read_bytes()), "files": len(manifest), "verified": True}
+    return {"archive": str(target), "sha256": digest(target.read_bytes()), "files": len(manifest), "verified": True,
+            "archive_integrity": True, "project_validation": readiness,
+            "scope": "Хеши ZIP и состояние проектов проверены; это не экспертиза стратегии и не готовность полного конкурсного пакета"}

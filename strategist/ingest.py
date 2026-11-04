@@ -10,7 +10,8 @@ import urllib.parse
 from html.parser import HTMLParser
 from pathlib import Path
 
-from .store import Problem, digest, canonical, atomic, transaction, load, now
+from .store import Problem, digest, canonical, atomic, transaction, load, now, bump, outcome
+from .validation import text
 
 
 class TextHTML(HTMLParser):
@@ -33,7 +34,7 @@ class TextHTML(HTMLParser):
             self.parts.append(text)
 
 
-def extract(data, extension):
+def _extract(data, extension):
     chunks, warnings = [], []
     if extension in (".docx", ".xlsx"):
         import zipfile
@@ -73,14 +74,14 @@ def extract(data, extension):
         wb = load_workbook(io.BytesIO(data), read_only=True, data_only=False, keep_links=False)
         try:
             for sheet in wb:
-                for row in sheet.iter_rows():
+                for row_number, row in enumerate(sheet.iter_rows(), 1):
                     values = []
                     for cell in row:
                         if cell.data_type == "f":
                             warnings.append(f"{sheet.title}!{cell.coordinate}: формула не вычислялась")
                         values.append("" if cell.value is None else str(cell.value))
                     if row:
-                        add(f"{sheet.title}!A{row[0].row}:{get_column_letter(len(row))}{row[0].row}", " | ".join(values))
+                        add(f"{sheet.title}!A{row_number}:{get_column_letter(len(row))}{row_number}", " | ".join(values) if any(values) else "")
         finally:
             wb.close()
     elif extension in (".html", ".htm"):
@@ -96,30 +97,89 @@ def extract(data, extension):
     return {"chunks": chunks, "warnings": warnings, "untrusted": True, "injection_flags": flags}
 
 
-def invalidate(s, source_ids=(), claim_ids=()):
+def extract(data, extension):
+    import zipfile
+    from xml.etree.ElementTree import ParseError
+    from lxml.etree import XMLSyntaxError
+    from pypdf.errors import PdfReadError
+    from docx.opc.exceptions import PackageNotFoundError
+    from openpyxl.utils.exceptions import InvalidFileException
+    try:
+        return _extract(data, extension)
+    except Problem:
+        raise
+    except (zipfile.BadZipFile, ParseError, XMLSyntaxError, PdfReadError, PackageNotFoundError,
+            InvalidFileException, UnicodeError, ValueError, KeyError, IndexError) as exc:
+        raise Problem(f"Документ не прочитан ({type(exc).__name__}); источник не зарегистрирован") from exc
+
+
+def predecessors(source):
+    return set(source.get("supersedes_ids", [])) | ({source["supersedes"]} if source.get("supersedes") else set())
+
+
+def superseded(s, sid):
+    return any(sid in predecessors(src) for src in s["sources"].values())
+
+
+def invalidate(s, source_ids=(), claim_ids=(), skip_roots=False):
     affected = set(claim_ids)
     changed = True
     while changed:
         changed = False
         for cid, c in s["claims"].items():
-            if cid not in affected and (any(r["source_id"] in source_ids for r in c["references"]) or set(c["depends_on"]) & affected):
+            if cid not in affected and (any(r["source_id"] in source_ids for r in c["references"]) or (set(c["depends_on"]) | set(c.get("counterevidence", []))) & affected):
                 affected.add(cid)
                 changed = True
     for cid in affected:
         c = s["claims"][cid]
-        if c["status"] not in ("withdrawn", "refuted"):
-            c["history"].append({"at": now(), "before": c["status"], "reason": "Изменилось основание"})
+        if skip_roots and cid in claim_ids:
+            continue
+        if c["status"] not in ("withdrawn", "refuted", "needs_review"):
+            bump(c, "Изменилось основание или контрсвидетельство")
             c["status"] = "needs_review"
     decisions, promises = [], []
     for collection, result in (("decisions", decisions), ("promises", promises)):
         for rid, record in s[collection].items():
             if set(record["basis"]) & affected:
-                record.setdefault("history", []).append({"at": now(), "before": record["status"], "reason": "Изменилось основание"})
-                record["status"] = "needs_review"
+                if record["status"] != "needs_review":
+                    bump(record, "Изменилось основание")
+                    record["status"] = "needs_review"
                 result.append(rid)
-    if s.get("strategy") and set(s["strategy"].get("basis", [])) & affected:
-        s["strategy"]["status"] = "needs_review"
-    return {"claims": sorted(affected), "decisions": decisions, "promises": promises}
+    strategy = []
+    st = s.get("strategy")
+    if st and (set(st.get("basis", [])) & affected or set(st.get("promise_ids", [])) & set(promises)):
+        if st["status"] != "needs_review":
+            bump(st, "Изменились основания или обещания стратегии")
+            st["status"] = "needs_review"
+        strategy.append(st.get("id", "STRATEGY"))
+    return {"claims": sorted(affected), "decisions": decisions, "promises": promises, "strategy": strategy}
+
+
+def link_replacement(s, sid, old):
+    if not old:
+        return None
+    if old not in s["sources"] or old == sid:
+        raise Problem("Заменяемый источник не существует или совпадает с новым")
+    # Рёбра идут от старого к новому; исключаем цикл до изменения записи.
+    pending, seen = [sid], set()
+    while pending:
+        node = pending.pop()
+        if node == old:
+            raise Problem("Цикл замены источников")
+        if node not in seen:
+            seen.add(node)
+            pending += [k for k, v in s["sources"].items() if node in predecessors(v)]
+    src = s["sources"][sid]
+    olds = predecessors(src)
+    if old in olds:
+        return {"claims": [], "decisions": [], "promises": [], "strategy": []}
+    bump(src, "Добавлена связь замены источника")
+    src["supersedes_ids"] = sorted(olds | {old})
+    src["supersedes"] = src.get("supersedes") or old
+    previous = s["sources"][old]
+    bump(previous, "Источник заменён новой версией")
+    previous["superseded_by"] = sorted(set(previous.get("superseded_by", [])) | {sid})
+    return invalidate(s, source_ids=[old])
 
 
 def ingest(root, path, origin=None, rights="provided_for_project", supersedes=None, expected_revision=None, *, extraction_override=None, metadata=None):
@@ -129,27 +189,40 @@ def ingest(root, path, origin=None, rights="provided_for_project", supersedes=No
         raise Problem("Материал превышает лимит размера")
     data = p.read_bytes()
     sha = digest(data)
-    sid = "SRC-" + sha[:16]
+    text(rights, "rights")
+    identity = (metadata or {}).get("original_response_sha256", sha)
+    sid = "SRC-" + identity[:16]
     with transaction(root, "ingest", "Извлечь недоверенный материал и сохранить происхождение", [p.name], expected_revision) as s:
-        if sid in s["sources"]:
-            return {"id": sid, "deduplicated": True}
-        if supersedes and supersedes not in s["sources"]:
-            raise Problem("Заменяемый источник не существует")
+        if not metadata or not metadata.get("original_response_sha256"):
+            sid = next((k for k, v in s["sources"].items() if sha in {v["sha256"]} | {p["sha256"] for p in v.get("representations", [])}), sid)
+        if sid in s["sources"] and sha in {s["sources"][sid]["sha256"]} | {p["sha256"] for p in s["sources"][sid].get("representations", [])}:
+            impact = link_replacement(s, sid, supersedes)
+            outcome(s, "done", "Существующее представление проверено; связь замены обработана", deduplicated=True)
+            return {"id": sid, "deduplicated": True, "impact": impact}
         extracted = extraction_override if extraction_override is not None else extract(data, p.suffix.lower())
         if not extracted["chunks"]:
             raise Problem("Текст не извлечён; скан/пустой документ требует другого метода")
-        target = f"sources/{sid}{p.suffix.lower()}"
+        existing = s["sources"].get(sid)
+        suffix = ("-" + sha[:16]) if existing else ""
+        target = f"sources/{sid}{suffix}{p.suffix.lower()}"
         (Path(root) / target).write_bytes(data)
-        text_path = f"evidence/{sid}.json"
+        text_path = f"evidence/{sid}{suffix}.json"
         atomic(Path(root) / text_path, extracted)
-        s["sources"][sid] = {"id": sid, "name": p.name, "sha256": sha, "path": target,
+        representation = {"sha256": sha, "path": target, "extracted": text_path, "extracted_sha256": digest(canonical(extracted))}
+        if existing:
+            bump(existing, "Добавлено представление того же первоисточника")
+            existing.setdefault("representations", [{k: existing[k] for k in representation}]).append(representation)
+        else:
+            s["sources"][sid] = {"id": sid, "identity_sha256": identity, "version": 1, "history": [], "name": p.name, "sha256": sha, "path": target,
                              "extracted": text_path, "extracted_sha256": digest(canonical(extracted)), "origin": origin or f"provided:{p.name}",
                              "accessed_at": now(), "rights": rights, "independence_group": origin or sha,
-                             "supersedes": supersedes, "warnings": extracted["warnings"],
+                             "representations": [representation], "supersedes": None, "warnings": extracted["warnings"],
                              "injection_flags": extracted["injection_flags"], "trust": "untrusted"}
         if metadata:
-            s["sources"][sid].update(metadata)
-        impact = invalidate(s, source_ids=[supersedes]) if supersedes else None
+            for key in ("original_response_sha256", "snapshot_mode", "selection"):
+                if key in metadata:
+                    s["sources"][sid][key] = metadata[key]
+        impact = link_replacement(s, sid, supersedes)
         return {"id": sid, "deduplicated": False, "chunks": len(extracted["chunks"]),
                 "warnings": extracted["warnings"], "injection_flags": extracted["injection_flags"], "impact": impact}
 

@@ -1,0 +1,11 @@
+{
+  "first_saved_code_change_utc": "2026-11-04T10:57:42.539759+00:00",
+  "recorded_at_utc": "2026-11-04T11:23:20.193033+00:00",
+  "observed_minutes_since_first_saved_change": 25.627554566666667,
+  "scope": "Календарное время после первого сохранённого исправления; предварительное чтение ревью и точный труд LLM неизвестны",
+  "paid_external_model_calls": 0,
+  "subscription_infrastructure_labor_price": "unknown",
+  "models": "Текущий Codex/GPT-6, независимые чаты/другие модели не запускались",
+  "video": "40s actual CLI recording, partial",
+  "publication": "Яндекс Диск выбран, доступа к загрузке нет"
+}

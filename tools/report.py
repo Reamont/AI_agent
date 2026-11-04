@@ -3,19 +3,26 @@ import argparse
 import html
 import json
 import shutil
+import subprocess
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 
 from strategist.store import load, digest
 from strategist.engine import validate
+from strategist import __version__
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--chromium', help='Путь к системному Chromium; иначе playwright browser')
     parser.add_argument('--font', default='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+    parser.add_argument('--revision', help='Полный commit для действующих ссылок на версии инструкций')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
+    revision = args.revision or subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+    if not re.fullmatch(r'[a-f0-9]{40}',revision):
+        raise ValueError('Для ссылок нужен полный commit SHA')
     sub = root / 'submission'
     screenshots = sub / 'screenshots'
     screenshots.mkdir(exist_ok=True)
@@ -36,9 +43,10 @@ def main():
     body += '<section id="impact"><h2>Новое свидетельство → пересмотр</h2><p class="lead">14 дней вместо 30: прежний вывод об удержании неприменим.</p><table><tr><th>ID</th><th>Сохранённое основание / вывод</th><th>Текущий статус</th></tr>'
     for cid in ['C-WINDOW', 'C-DECLINE', 'C-CAUSE', 'C-FUNCTION', 'C-UPDATE']:
         c = state['claims'][cid]
-        body += f'<tr><td>{cid}</td><td>{esc(c["text"])}</td><td>{esc(c["status"])}</td></tr>'
-    body += '</table><h3>Последствия</h3><p>D-01 и P-PILOT требуют пересмотра. P-CURRENT остаётся актуальным.</p>'
-    body += '<p class="notice">D-02 предложено: получить зрелую D30 когорту. Владелец не назначен. Новых инвестиций не согласовано.</p></section>'
+        statuses={'current':'актуально','refuted':'опровергнуто','needs_review':'требует пересмотра'}
+        body += f'<tr><td>{cid}</td><td>{esc(c["text"])}</td><td>{esc(statuses.get(c["status"],c["status"]))}</td></tr>'
+    body += '</table><h3>Последствия</h3><p>D-01, D-02, P-PILOT и стратегия требуют пересмотра. После нового источника P-CURRENT перепроверено: только список задач и CSV, без приглашения.</p>'
+    body += '<p class="notice">D-03 предложено: сохранить объём инвестиций до аудита D30, не обещать недоступное приглашение. Принимающий решение и исполнитель не назначены.</p></section>'
     body += '<section><h2>Границы проверки</h2><p>Автоматические тесты проверяют инструменты и инварианты; качество стратегии требует эксперта. Baseline не измерен. Видео не готово.</p></section>'
     document = '''<!doctype html><html lang="ru"><meta charset="utf-8"><title>Стратег — сохранённые результаты</title><style>
     *{box-sizing:border-box}body{font:19px/1.55 system-ui,sans-serif;margin:0;color:#172c30;background:#eff4f1}header{padding:35px 60px;background:#103f39;color:#fff}h1{font-size:42px;margin:10px 0}h2{font-size:30px;margin-top:0}h3{margin:24px 0 12px}.tag{font-size:13px;letter-spacing:2px;color:#b8ecbd}section{margin:30px 50px;padding:32px;background:white;border:1px solid #d4e1d9;border-radius:16px}.lead{font-size:25px;font-weight:550}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}article{background:#f0f6f2;padding:22px;border-radius:12px}article p{font-size:24px}small{font-size:16px;color:#50635e}table{width:100%;border-collapse:collapse;font-size:17px}td,th{padding:12px 15px;border-bottom:1px solid #d4dfd8;text-align:left}th{background:#edf4ef}.notice{border-left:4px solid #d5a430;padding:14px 20px;background:#fff8e3}
@@ -92,9 +100,13 @@ CLI сохраняет записи, а не заменяет исследова
 DOCX/CSV/XLSX/TXT/сайта → воспроизводимый weighted расчёт 200/300 и 170/300 →
 гипотезы/пробелы → 4 варианта со сильными возражениями → продуктовая и
 коммуникационная стратегии → таблица обещаний и план опыта → simulated D-01 →
-checkpoint → resume в другом процессе → новое свидетельство 14/30 дней →
-транзитивный impact → proposed D-02. Новый процесс проверен; настоящий новый
-чат в Cursor должен быть записан капитаном отдельно.
+checkpoint → resume в другом процессе → отложенная интерпретация ранее импортированных
+данных 14/30 дней → impact → предложено D-02. После ревью реально записан новый resume,
+затем создан и импортирован capability-update-after-resume. Он изменил доступность
+приглашения: пересмотрены C-FUNCTION, D-02, P-CURRENT и стратегия; предложено D-03.
+P-CURRENT перепроверено по C-AVAILABLE-V2. Точные argv/выходы/хеши и тексты текущей
+LLM сохранены в evals/llm-traces; это self-recorded текущая сессия, не независимый
+новый чат и не выгрузка переписки провайдером. Настоящий новый чат должен быть записан отдельно.
 Второй сценарий: права доступа библиотечного каталога по PDF/HTML; текущая LLM
 выбрала тест пересказа, а не когортный анализ. Полная вторая стратегия не строилась.
 
@@ -138,8 +150,33 @@ install -e → doctor → tests → resume. Для нового проекта i
 Локальный проект и учебное демо подготовлены, ZIP проверяется манифестом. Этот PDF
 включает настоящие скриншоты локального HTML-представления фактического состояния,
 не имитацию экрана чата. Видеозапись НЕ ГОТОВА, сценарий не заменяет запись.
-Публичная публикация и доступ жюри не выполнялись. Финальную отправку делает капитан.
+Исходник отправляется в существующий GitHub-репозиторий; его видимость не меняется.
+Доступ жюри независимо не проверен (GitHub API Forbidden). Для финального видео
+пользователь выбрал Яндекс Диск, но доступ на загрузку к нему не подключён.
+Финальную отправку делает капитан.
 '''
+    source=source.replace('0.1.0',__version__)
+    source+='''
+## Исправления после ревью
+Проверка хеша CSV выполняется до расчёта внутри транзакции. Дедупликация не отменяет
+замену источника; контрсвидетельства и обещания стратегии входят в граф. Каскадные
+изменения версионируются. Обновление решения/обещания сохраняет ID и историю;
+decision_maker отделён от owner. Конфигурация и workflow валидируются, NaN/Infinity
+не принимаются. Журнал различает транзакцию, отказ, невалидный результат, запрос
+денег и реальные расходы. История проверяется отдельно от восстановимости её
+материалов. Память демо учитывает 18.4594 минуты первоначального календарного
+интервала с паузами; это не точный труд LLM. Условия четырёх вариантов исправлены,
+диагностика/прототип/пилот разделены, C-COMM остаётся гипотезой. Полная карта всех
+33 замечаний — docs/review-fixes.md, без заявления готовности нерешённых пунктов.
+'''
+    video_check=sub/'video-check.json'
+    if video_check.exists():
+        video=json.loads(video_check.read_text())
+        source+='\n## Статус реальной технической записи\n'+('Записано реальное выполнение CLI в Chromium, '+str(round(video.get('duration_seconds',0),1))+' секунды. Это видеозапись воспроизведения сохранённого демо, не нового чата; полный обязательный ролик по-прежнему не готов. Размещение на Яндекс Диске не выполнено.' if video.get('status')=='partial' else 'Попытка записи не завершилась: '+video.get('reason','неизвестно')+'. Готовая полная видеозапись не заявлена.')+'\n'
+    links=['AGENTS.md','instructions/agent.md','workflows/research.md','prompts/first-message.md','docs/review-fixes.md','docs/requirements-matrix.md','evals/llm-traces/continuation.jsonl','evals/llm-traces/second-task.jsonl']
+    source+='\n## Навигация по конкретной версии\n\n'
+    for path in links:
+        source+=f'[{path}](https://github.com/Reamont/AI_agent/blob/{revision}/{path})\n'
     (sub/'report-source.md').write_text(source)
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak
     from reportlab.lib.styles import ParagraphStyle
@@ -149,7 +186,7 @@ install -e → doctor → tests → resume. Для нового проекта i
     from reportlab.lib.pagesizes import A4
     pdfmetrics.registerFont(TTFont('ReportFont', args.font))
     normal = ParagraphStyle('Body', fontName='ReportFont', fontSize=10.3, leading=14.3, spaceAfter=8)
-    heading = ParagraphStyle('Heading', parent=normal, fontSize=16, leading=21, spaceBefore=14, textColor=HexColor('#103f39'))
+    heading = ParagraphStyle('Heading', parent=normal, fontSize=16, leading=21, spaceBefore=14, keepWithNext=True, textColor=HexColor('#103f39'))
     title = ParagraphStyle('Title', parent=heading, fontSize=23, leading=30)
     story = []
     for block in source.split('\n\n'):
@@ -160,7 +197,13 @@ install -e → doctor → tests → resume. Для нового проекта i
             if rest.strip():
                 story.append(Paragraph(esc(rest).replace('\n', ' '), normal))
         else:
-            story.append(Paragraph(esc(block).replace('\n', ' '), normal))
+            link_lines=block.splitlines()
+            if link_lines and all(re.fullmatch(r'\[([^\]]+)\]\((https://[^)]+)\)',line) for line in link_lines):
+                for line in link_lines:
+                    label,url=re.fullmatch(r'\[([^\]]+)\]\((https://[^)]+)\)',line).groups()
+                    story.append(Paragraph(f'<link href="{esc(url)}" color="#14624c">{esc(label)}</link>',normal))
+            else:
+                story.append(Paragraph(esc(block).replace('\n', ' '), normal))
     story += [PageBreak(), Paragraph('Реальный скриншот: сохранённый результат', heading)]
     from PIL import Image as PILImage
     for filename in ['overview.png', 'impact.png']:
@@ -174,7 +217,7 @@ install -e → doctor → tests → resume. Для нового проекта i
     pdfpath = sub/'report.pdf'
     def footer(canvas, doc):
         canvas.setFont('ReportFont',8)
-        canvas.drawString(45,25,'Стратег Фабрики проектов · 0.1.0 · Учебный прогон')
+        canvas.drawString(45,25,f'Стратег Фабрики проектов · {__version__} · Учебный прогон')
         canvas.drawRightString(550,25,str(doc.page))
     SimpleDocTemplate(str(pdfpath),pagesize=A4,leftMargin=45,rightMargin=45,topMargin=40,bottomMargin=45).build(story,onFirstPage=footer,onLaterPages=footer)
     from pypdf import PdfReader
@@ -182,7 +225,8 @@ install -e → doctor → tests → resume. Для нового проекта i
     text='\n'.join(p.extract_text() or '' for p in reader.pages)
     check={'at':datetime.now(timezone.utc).isoformat(),'pages':len(reader.pages),'cyrillic_extracted':'Стратег' in text,
            'screenshots':[{'path':'screenshots/'+p.name,'sha256':digest(p.read_bytes())} for p in screenshots.glob('*.png')],
-           'pdf_sha256':digest(pdfpath.read_bytes()),'render_review':'pending; rasterize and inspect separately'}
+           'pdf_sha256':digest(pdfpath.read_bytes()),'instruction_commit':revision,
+           'version_links':len(links),'keep_headings_with_next':True,'render_review':'pending; rasterize and inspect separately'}
     (sub/'report-check.json').write_text(json.dumps(check,ensure_ascii=False,indent=2))
     print(json.dumps(check,ensure_ascii=False,indent=2))
 
