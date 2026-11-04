@@ -1,17 +1,20 @@
 {
-  "at": "2026-11-04T10:26:04.321842+00:00",
-  "pages": 4,
+  "at": "2026-11-04T11:29:11.867943+00:00",
+  "pages": 6,
   "cyrillic_extracted": true,
   "screenshots": [
     {
-      "path": "screenshots/overview.png",
-      "sha256": "a895e69ab75ea82768d2c7ad93db1977ffbb8aee3a98f46862491ec1d8ee0430"
+      "path": "screenshots/impact.png",
+      "sha256": "2f864aedfb149019768accb515c39bcda840ead5e5f8f27845dd57fe934ba3e0"
     },
     {
-      "path": "screenshots/impact.png",
-      "sha256": "4d3bff4ee295d77cf95615b48494d46bdb9eac29c289dc95a9b7fd98b6efe72c"
+      "path": "screenshots/overview.png",
+      "sha256": "25aead46057989719fd6d2edb6d0f8946a83746cf47a97f81813d6e8e0068d63"
     }
   ],
-  "pdf_sha256": "93779f98abd5534b15a77c48f7dde680661115603a3d17e1d96992240688869d",
-  "render_review": "PDF растрирован pdftoppm, кириллица и финальная вёрстка визуально проверены; реальные скриншоты HTML-результатов проверены отдельно, таблица читается."
+  "pdf_sha256": "10eabe1b53c8a0258713ee332768e9b5c853b9dd16cd2ca6069c0a205a6aa76a",
+  "instruction_commit": "8fb16ff71dc788f370e845383eb34e3b0b1c9ed8",
+  "version_links": 8,
+  "keep_headings_with_next": true,
+  "render_review": "PDF растрирован pdftoppm; страницы с заголовками и навигацией визуально проверены, кириллица читаема; 8 URI-аннотаций на точный commit проверены pypdf."
 }

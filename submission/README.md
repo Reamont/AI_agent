@@ -7,7 +7,7 @@
 | Элемент | Путь / настоящая ссылка | Статус | Проверка / остаток |
 |---|---|---|---|
 | Исходник | [Reamont/AI_agent](https://github.com/Reamont/AI_agent) | код 0.2.0, правки по ревью | точный commit отправки фиксируется Git; видимость репозитория не менялась, доступ жюри не доказан |
-| Архив | локально `/workspace/artifacts/strategist-0.2.0.zip`, хеш в `archive-info-0.2.0.json` рядом | ZIP и состояния проектов проверяются; чистая установка в evals/clean-install.json | разместить на Яндекс Диске; локальный путь не является ссылкой для жюри |
+| Архив | [ZIP в репозитории](https://github.com/Reamont/AI_agent/blob/main/dist/strategist-0.2.0.zip); локально `/workspace/artifacts/strategist-0.2.0.zip` | ZIP и состояния проектов проверены; чистая установка в evals/clean-install.json; хеш в dist/archive-info.json | для финальной сдачи разместить на Яндекс Диске; GitHub-доступ жюри отдельно не подтверждён |
 | Демо | [первый сценарий](../projects/demo/README.md), [второй](../projects/second/README.md) | текущая LLM-сессия и инструменты реально выполнены | [трасса продолжения](../evals/llm-traces/continuation.jsonl), [другая задача](../evals/llm-traces/second-task.jsonl); self-recorded, не независимый чат |
 | PDF | [report.pdf](report.pdf), [проверка](report-check.json), [исходник](report-source.md) | реальные скриншоты, исправленный перенос, ссылки на commit инструкций | разместить на Яндекс Диске, проверить доступ без авторизации или от имени жюри |
 | Техническая видеозапись | [walkthrough-cli.webm](walkthrough-cli.webm), [проверка](video-check.json) | **частично: 40 секунд реального CLI в Chromium**, воспроизведение сохранённого демо | ≤10 минут проверено ffprobe; нового чата в записи нет, полного ролика не заменяет |

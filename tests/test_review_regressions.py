@@ -274,6 +274,18 @@ class ReviewRegressions(unittest.TestCase):
         self.assertEqual(existing.read_text(),'KEEP ORIGINAL')
         self.assertFalse((folder/'brief.docx').exists())
 
+    def test_r20_multiple_representations_have_citable_locators(self):
+        identity='b'*64
+        for filename,quote,locator in [('first.txt','First excerpt','line:4'),('second.txt','Capability exists','line:9')]:
+            p=self.base/filename;p.write_text(quote)
+            result=ingest(self.root,p,metadata={'original_response_sha256':identity},
+                          extraction_override={'chunks':[{'locator':locator,'text':quote}],'warnings':[],'injection_flags':[],'untrusted':True})
+        sid=result['id']
+        self.claim(sid,references=[{'source_id':sid,'locator':'line:9','quote':'Capability exists'}])
+        self.assertEqual(len(load(self.root)['sources']),1)
+        self.assertEqual(len(load(self.root)['sources'][sid]['representations']),2)
+        self.assertTrue(engine.validate(self.root)['valid'])
+
     def test_r22_pack_refuses_corrupt_state(self):
         (self.root/'state/project.json').write_text('{}')
         with self.assertRaises(Problem):pack(self.root,self.base/'broken.zip')

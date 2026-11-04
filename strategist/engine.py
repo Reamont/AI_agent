@@ -20,13 +20,20 @@ def check_reference(root, s, ref):
     source = s["sources"].get(ref.get("source_id"))
     if not source:
         raise Problem("Источник утверждения не найден")
-    checked_source(root, source)
-    extracted = json.loads(safe_path(root, source["extracted"]).read_text())
-    if digest(canonical(extracted)) != source["extracted_sha256"]:
-        raise Problem("Изменился хеш извлечённого материала")
-    matches = [c for c in extracted["chunks"] if c["locator"] == ref.get("locator")]
-    if not matches or not ref.get("quote") or ref["quote"] not in matches[0]["text"]:
-        raise Problem("Локатор или цитата не совпадают с извлечённым источником")
+    primary = {k: source[k] for k in ("path", "sha256", "extracted", "extracted_sha256")}
+    representations = [primary] + source.get("representations", [])
+    matched = False
+    for representation in representations:
+        if ref.get("representation_sha256") and ref["representation_sha256"] != representation["sha256"]:
+            continue
+        checked_source(root, representation)
+        extracted = json.loads(safe_path(root, representation["extracted"]).read_text())
+        if digest(canonical(extracted)) != representation["extracted_sha256"]:
+            raise Problem("Изменился хеш извлечённого материала")
+        if any(c["locator"] == ref["locator"] and ref["quote"] in c["text"] for c in extracted["chunks"]):
+            matched = True
+    if not matched:
+        raise Problem("Локатор или цитата не совпадают с сохранённым представлением источника")
 
 
 def checked_source(root, source):

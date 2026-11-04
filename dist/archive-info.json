@@ -1,0 +1,27 @@
+{
+  "archive": "/workspace/artifacts/strategist-0.2.0.zip",
+  "sha256": "94f5eb3087d528dd0dab720def3777af09160b2164a66af3dbacc89462e732d4",
+  "files": 196,
+  "verified": true,
+  "archive_integrity": true,
+  "project_validation": [
+    {
+      "project": "projects/demo",
+      "valid": true,
+      "warnings": [
+        "SRC-fbc01971dcf79554: подозрительные инструкции изолированы как данные",
+        "D-01: требует пересмотра",
+        "D-02: требует пересмотра",
+        "P-PILOT: требует пересмотра",
+        "strategy: требует пересмотра",
+        "Не все исторические версии восстановимы с доступными материалами; см. history"
+      ]
+    },
+    {
+      "project": "projects/second",
+      "valid": true,
+      "warnings": []
+    }
+  ],
+  "scope": "Хеши ZIP и состояние проектов проверены; это не экспертиза стратегии и не готовность полного конкурсного пакета"
+}

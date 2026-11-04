@@ -9,5 +9,6 @@
   "ffmpeg_version": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
   "new_llm_chat_included": false,
   "fulfills_full_submission": false,
-  "publication": "not published to an allowed video hosting service"
+  "publication": "not published to an allowed video hosting service",
+  "visual_review": "Проверен кадр реальной записи: подпись о replay и отсутствии нового чата видна, посторонних данных/секретов не обнаружено."
 }

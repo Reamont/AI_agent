@@ -7,5 +7,7 @@
   "subscription_infrastructure_labor_price": "unknown",
   "models": "Текущий Codex/GPT-6, независимые чаты/другие модели не запускались",
   "video": "40s actual CLI recording, partial",
-  "publication": "Яндекс Диск выбран, доступа к загрузке нет"
+  "publication": "Яндекс Диск выбран, доступа к загрузке нет",
+  "package_preparation_finished_utc": "2026-11-04T13:44:16.338066+00:00",
+  "observed_minutes_until_package_preparation": 166.56330511666664
 }

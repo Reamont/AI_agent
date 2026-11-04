@@ -3,5 +3,6 @@
 *.xlsx binary
 *.png binary
 *.webm binary
+*.zip binary
 # Вход ревью сохранён побайтно, включая CRLF и намеренные Markdown hard breaks.
 docs/review-input.md -text -whitespace
