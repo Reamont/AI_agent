@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-04T10:26:04.321842+00:00",
+  "pages": 4,
+  "cyrillic_extracted": true,
+  "screenshots": [
+    {
+      "path": "screenshots/overview.png",
+      "sha256": "a895e69ab75ea82768d2c7ad93db1977ffbb8aee3a98f46862491ec1d8ee0430"
+    },
+    {
+      "path": "screenshots/impact.png",
+      "sha256": "4d3bff4ee295d77cf95615b48494d46bdb9eac29c289dc95a9b7fd98b6efe72c"
+    }
+  ],
+  "pdf_sha256": "93779f98abd5534b15a77c48f7dde680661115603a3d17e1d96992240688869d",
+  "render_review": "PDF растрирован pdftoppm, кириллица и финальная вёрстка визуально проверены; реальные скриншоты HTML-результатов проверены отдельно, таблица читается."
+}

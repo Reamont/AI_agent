@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabrika-strategist"
+version = "0.1.0"
+description = "Проверяемые инструменты агента Стратег Фабрики проектов"
+requires-python = ">=3.12"
+dependencies = ["pypdf==6.10.0", "python-docx==1.2.0", "openpyxl==3.1.5"]
+
+[project.scripts]
+strategist = "strategist.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["strategist*"]

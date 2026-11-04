@@ -1,0 +1,60 @@
+{
+  "revision": 26,
+  "checkpoint_revision": 26,
+  "workflow": {
+    "completed": [
+      "Учебный бриф",
+      "План вопросов",
+      "Реальный импорт DOCX/CSV/XLSX/TXT/сайта",
+      "Расчёт 200/300 и 170/300",
+      "Четыре варианта",
+      "Две стратегии",
+      "Симуляция D-01"
+    ],
+    "errors": [
+      {
+        "at": "2026-11-04T10:04:29.454808+00:00",
+        "message": "DNS недоступен: gaierror",
+        "status": "error",
+        "tool": "fetch"
+      },
+      {
+        "at": "2026-11-04T10:04:34.562976+00:00",
+        "message": "DNS недоступен: gaierror",
+        "status": "error",
+        "tool": "fetch"
+      }
+    ],
+    "human_decisions": [
+      {
+        "id": "D-01",
+        "status": "simulated"
+      }
+    ],
+    "next_action": "Прочитать measurement-update.md и проверить C-WINDOW",
+    "open_questions": [
+      "Совпадает ли окно D30?",
+      "Действительно ли приглашение — барьер?",
+      "Кто владелец и какова смета?"
+    ],
+    "pending": [],
+    "stage": "paused"
+  },
+  "budget": {
+    "elapsed_minutes": 0,
+    "spent": 0,
+    "unknown_cost_attempts": 0
+  },
+  "validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      "SRC-fbc01971dcf79554: подозрительные инструкции изолированы как данные"
+    ],
+    "revision": 26,
+    "sources": 8,
+    "claims": 7,
+    "scope": "Структура, цитаты, хеши и ссылки; не экспертная оценка истинности и качества стратегии"
+  },
+  "note": "Восстановлено из файлов; журнал и первоисточники доступны. Новое исследование не выполнялось."
+}

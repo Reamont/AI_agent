@@ -1,0 +1,11 @@
+{
+  "start_utc": "2026-11-04T09:53:06+00:00",
+  "package_preparation_finished_utc": "2026-11-04T10:25:16.693524+00:00",
+  "observed_elapsed_minutes": 32.18,
+  "type": "Время сеанса разработки/демо/документирования/проверок; не чистое CPU и не измерение ускорения",
+  "direct_paid_api_calls": 0,
+  "direct_paid_api_payments": 0,
+  "currency": "RUB",
+  "subscription_infrastructure_labor_cost": "unknown",
+  "human_help": "Пользователь дал задачу и приложил одинаковый промпт дважды; независимая экспертиза не проводилась"
+}

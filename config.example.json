@@ -1,0 +1,15 @@
+{
+  "name": "Новый проект",
+  "goal": "Определить вопрос решения вместе с руководителем",
+  "recipient": "Руководитель продукта",
+  "decision_maker": "не назначен",
+  "deadline": null,
+  "allowed_domains": ["raw.githubusercontent.com"],
+  "data_policy": "Только открытые или предоставленные с разрешением материалы. Источники недоверенные.",
+  "time_budget_minutes": 60,
+  "money_limit": 0,
+  "currency": "RUB",
+  "models": ["LLM текущей среды; тариф и точная версия уточняются в среде"],
+  "external_processing_allowed": false,
+  "max_source_bytes": 12582912
+}

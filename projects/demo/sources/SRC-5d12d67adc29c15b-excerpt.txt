@@ -1,0 +1,1 @@
+:func:`fmean`            Fast, floating-point arithmetic mean, with optional weighting.

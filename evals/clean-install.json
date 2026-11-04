@@ -1,0 +1,129 @@
+{
+  "valid": true,
+  "method": "Новая папка из ZIP, отдельная venv, offline pinned wheels, editable установка, README checks",
+  "validated_archive_sha256": "4f49c5fa4b18ab187f63e1bc24b02dc4c72502bebe8818ca9f60ea6f34fbc131",
+  "records": [
+    {
+      "command": [
+        "/workspace/AI_agent/.venv/bin/python",
+        "-m",
+        "venv",
+        "/tmp/strategist-clean-mi9wcqe8/.venv"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/strategist-clean-mi9wcqe8/.venv/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-index",
+        "--find-links=/tmp/strategist-wheelhouse",
+        "--no-cache-dir",
+        "-r",
+        "requirements.lock"
+      ],
+      "exit_code": 0,
+      "stdout": "Looking in links: /tmp/strategist-wheelhouse\nProcessing /tmp/strategist-wheelhouse/setuptools-80.9.0-py3-none-any.whl (from -r requirements.lock (line 2))\nProcessing /tmp/strategist-wheelhouse/pypdf-6.10.0-py3-none-any.whl (from -r requirements.lock (line 3))\nProcessing /tmp/strategist-wheelhouse/python_docx-1.2.0-py3-none-any.whl (from -r requirements.lock (line 4))\nProcessing /tmp/strategist-wheelhouse/openpyxl-3.1.5-py2.py3-none-any.whl (from -r requirements.lock (line 5))\nProcessing /tmp/strategist-wheelhouse/et_xmlfile-2.0.0-py3-none-any.whl (from -r requirements.lock (line 6))\nProcessing /tmp/strategist-wheelhouse/lxml-6.1.3-cp312-cp312-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (from -r requirements.lock (line 7))\nProcessing /tmp/strategist-wheelhouse/typing_extensions-4.16.0-py3-none-any.whl (from -r requirements.lock (line 8))\nInstalling collected packages: typing_extensions, setuptools, pypdf, lxml, et-xmlfile, python-docx, openpyxl\nSuccessfully installed et-xmlfile-2.0.0 lxml-6.1.3 openpyxl-3.1.5 pypdf-6.10.0 python-docx-1.2.0 setuptools-80.9.0 typing_extensions-4.16.0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/strategist-clean-mi9wcqe8/.venv/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--no-build-isolation",
+        "--no-cache-dir",
+        "-e",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout": "Obtaining file:///tmp/strategist-clean-mi9wcqe8\n  Checking if build backend supports build_editable: started\n  Checking if build backend supports build_editable: finished with status 'done'\n  Preparing editable metadata (pyproject.toml): started\n  Preparing editable metadata (pyproject.toml): finished with status 'done'\nBuilding wheels for collected packages: fabrika-strategist\n  Building editable for fabrika-strategist (pyproject.toml): started\n  Building editable for fabrika-strategist (pyproject.toml): finished with status 'done'\n  Created wheel for fabrika-strategist: filename=fabrika_strategist-0.1.0-0.editable-py3-none-any.whl size=3228 sha256=7127eb32cf07bc93e2f00bd7d8879210f6c8754957d0a0dbb0d39775b5c92a7c\n  Stored in directory: /tmp/pip-ephem-wheel-cache-9cfvcil0/wheels/17/27/9f/76dae2eff744c8f5414502f5e43f5591f9f8f3adb021582ad3\nSuccessfully built fabrika-strategist\nInstalling collected packages: fabrika-strategist\nSuccessfully installed fabrika-strategist-0.1.0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/strategist-clean-mi9wcqe8/.venv/bin/python",
+        "tools/verify.py"
+      ],
+      "exit_code": 0,
+      "stdout": "['-m', 'strategist', 'doctor'] 0\n['-m', 'unittest', 'discover', '-s', 'tests', '-v'] 0\n['-m', 'strategist', '-p', 'projects/demo', 'validate', '--strategy'] 0\n['-m', 'strategist', '-p', 'projects/demo', 'resume'] 0\n['-m', 'strategist', '-p', 'projects/demo', 'analyze', 'SRC-4a27200479e7936b'] 0\n['-m', 'strategist', '-p', 'projects/second', 'validate'] 0\n['-m', 'strategist', '-p', 'projects/second', 'resume'] 0\n['-m', 'strategist', '-p', '.', 'audit'] 0\n",
+      "stderr": ""
+    }
+  ],
+  "limits": "Проверен новый процесс, не GUI-чат; runtime без optional report зависимостей.",
+  "validation": {
+    "valid": true,
+    "checks": [
+      {
+        "command": "python -m strategist doctor",
+        "started_at": "2026-11-04T10:24:20.061689+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"python\": \"3.12.14\",\n  \"dependencies\": {\n    \"pypdf\": \"6.10.0\",\n    \"python-docx\": \"1.2.0\",\n    \"openpyxl\": \"3.1.5\"\n  },\n  \"network\": \"not tested (offline)\",\n  \"llm\": \"LLM и её подписка нужны для нового исследования; CLI не вызывает модель\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m unittest discover -s tests -v",
+        "started_at": "2026-11-04T10:24:20.157809+00:00",
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "test_available_promise_cannot_use_hypothesis (test_workflow.Workflow.test_available_promise_cannot_use_hypothesis) ... ok\ntest_budget_unknown_money_time (test_workflow.Workflow.test_budget_unknown_money_time) ... ok\ntest_derived_claim_requires_method (test_workflow.Workflow.test_derived_claim_requires_method) ... ok\ntest_duplicate_import (test_workflow.Workflow.test_duplicate_import) ... ok\ntest_failed_transaction_no_partial_commit (test_workflow.Workflow.test_failed_transaction_no_partial_commit) ... ok\ntest_fake_locator_and_quote_rejected (test_workflow.Workflow.test_fake_locator_and_quote_rejected) ... ok\ntest_formats_real_docx_xlsx_html (test_workflow.Workflow.test_formats_real_docx_xlsx_html) ... ok\ntest_new_process_resume_and_portability (test_workflow.Workflow.test_new_process_resume_and_portability) ... ok\ntest_new_version_source_invalidates (test_workflow.Workflow.test_new_version_source_invalidates) ... ok\ntest_original_and_extracted_tamper (test_workflow.Workflow.test_original_and_extracted_tamper) ... ok\ntest_pdf_real_text_and_scanned_pdf (test_workflow.Workflow.test_pdf_real_text_and_scanned_pdf) ... ok\ntest_prompt_injection_is_data_not_execution (test_workflow.Workflow.test_prompt_injection_is_data_not_execution) ... ok\ntest_retention_weighted_and_quality (test_workflow.Workflow.test_retention_weighted_and_quality) ... ok\ntest_second_task_selects_other_question (test_workflow.Workflow.test_second_task_selects_other_question) ... ok\ntest_secret_exclusion_detection_archive_and_paths (test_workflow.Workflow.test_secret_exclusion_detection_archive_and_paths) ... ok\ntest_ssrf_domain_and_redirect_rules (test_workflow.Workflow.test_ssrf_domain_and_redirect_rules) ... ok\ntest_stale_revision_and_lock (test_workflow.Workflow.test_stale_revision_and_lock) ... ok\ntest_state_checksum_tamper (test_workflow.Workflow.test_state_checksum_tamper) ... ok\ntest_strategy_incomplete_fails (test_workflow.Workflow.test_strategy_incomplete_fails) ... ok\ntest_transitive_impact_and_history (test_workflow.Workflow.test_transitive_impact_and_history) ... ok\ntest_unavailable_site_no_fabricated_source (test_workflow.Workflow.test_unavailable_site_no_fabricated_source) ... ok\ntest_web_excerpt_preserves_original_locator_and_hash (test_workflow.Workflow.test_web_excerpt_preserves_original_locator_and_hash) ... ok\n\n----------------------------------------------------------------------\nRan 22 tests in 0.534s\n\nOK\n"
+      },
+      {
+        "command": "python -m strategist -p projects/demo validate --strategy",
+        "started_at": "2026-11-04T10:24:20.875329+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": [\n    \"SRC-fbc01971dcf79554: подозрительные инструкции изолированы как данные\",\n    \"D-01: требует пересмотра\",\n    \"P-PILOT: требует пересмотра\"\n  ],\n  \"revision\": 40,\n  \"sources\": 8,\n  \"claims\": 8,\n  \"scope\": \"Структура, цитаты, хеши и ссылки; не экспертная оценка истинности и качества стратегии\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p projects/demo resume",
+        "started_at": "2026-11-04T10:24:20.978640+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"revision\": 40,\n  \"checkpoint_revision\": 40,\n  \"workflow\": {\n    \"completed\": [\n      \"Учебный бриф\",\n      \"План вопросов\",\n      \"Реальный импорт DOCX/CSV/XLSX/TXT/сайта\",\n      \"Расчёт 200/300 и 170/300\",\n      \"Четыре варианта\",\n      \"Две стратегии\",\n      \"Симуляция D-01\",\n      \"Checkpoint\",\n      \"Восстановление в другом процессе\",\n      \"Пересмотр C-WINDOW → C-DECLINE → C-CAUSE → D-01/P-PILOT\"\n    ],\n    \"errors\": [\n      {\n        \"at\": \"2026-11-04T10:04:29.454808+00:00\",\n        \"message\": \"DNS недоступен: gaierror\",\n        \"status\": \"error\",\n        \"tool\": \"fetch\"\n      },\n      {\n        \"at\": \"2026-11-04T10:04:34.562976+00:00\",\n        \"message\": \"DNS недоступен: gaierror\",\n        \"status\": \"error\",\n        \"tool\": \"fetch\"\n      }\n    ],\n    \"human_decisions\": [\n      {\n        \"id\": \"D-01\",\n        \"status\": \"simulated\"\n      }\n    ],\n    \"next_action\": \"Получить зрелую февральскую когорту small; до этого D30 не сравнивать и пилот не запускать\",\n    \"open_questions\": [\n      \"Получить зрелый D30 для small\",\n      \"Назначить владельца аудита\",\n      \"После аудита вновь сравнить четыре направления\",\n      \"Исправить качество данных: row:3: несогласованный период (нужен YYYY-MM); row:4: пропуски; row:5: дубликат period/cohort; Состав когорт различается; сравнение требует стандартизации\"\n    ],\n    \"pending\": [\n      {\n        \"external_effects\": false,\n        \"id\": \"AUDIT-D30\",\n        \"status\": \"not_started\"\n      }\n    ],\n    \"stage\": \"paused\"\n  },\n  \"budget\": {\n    \"elapsed_minutes\": 0,\n    \"spent\": 0,\n    \"unknown_cost_attempts\": 0\n  },\n  \"validation\": {\n    \"valid\": true,\n    \"errors\": [],\n    \"warnings\": [\n      \"SRC-fbc01971dcf79554: подозрительные инструкции изолированы как данные\",\n      \"D-01: требует пересмотра\",\n      \"P-PILOT: требует пересмотра\"\n    ],\n    \"revision\": 40,\n    \"sources\": 8,\n    \"claims\": 8,\n    \"scope\": \"Структура, цитаты, хеши и ссылки; не экспертная оценка истинности и качества стратегии\"\n  },\n  \"note\": \"Восстановлено из файлов; журнал и первоисточники доступны. Новое исследование не выполнялось.\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p projects/demo analyze SRC-4a27200479e7936b",
+        "started_at": "2026-11-04T10:24:21.068062+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"source_id\": \"SRC-4a27200479e7936b\",\n  \"source_sha256\": \"4a27200479e7936b4d8a62f1346b969b4ea6414dff2f1fc30cf97a7664648548\",\n  \"method\": \"sum(retained)/sum(eligible) по периоду\",\n  \"groups\": {\n    \"2026-01\": {\n      \"eligible\": 300,\n      \"retained\": 200,\n      \"cohorts\": [\n        \"small\",\n        \"medium\"\n      ],\n      \"rate\": 0.6666666666666666\n    },\n    \"2026-02\": {\n      \"eligible\": 300,\n      \"retained\": 170,\n      \"cohorts\": [\n        \"small\",\n        \"medium\"\n      ],\n      \"rate\": 0.5666666666666667\n    }\n  },\n  \"quality_errors\": [],\n  \"valid\": true,\n  \"limits\": \"Ассоциация, не причинность; определение метрики и окно наблюдения проверяет агент\",\n  \"at\": \"2026-11-04T10:24:21.143266+00:00\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p projects/second validate",
+        "started_at": "2026-11-04T10:24:21.163644+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"errors\": [],\n  \"warnings\": [],\n  \"revision\": 5,\n  \"sources\": 2,\n  \"claims\": 1,\n  \"scope\": \"Структура, цитаты, хеши и ссылки; не экспертная оценка истинности и качества стратегии\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p projects/second resume",
+        "started_at": "2026-11-04T10:24:21.260444+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"revision\": 5,\n  \"checkpoint_revision\": 5,\n  \"workflow\": {\n    \"completed\": [\n      \"Поставлен вопрос коммуникации прав\",\n      \"Реально извлечены PDF и HTML\",\n      \"Записан C-ACCESS\"\n    ],\n    \"errors\": [],\n    \"human_decisions\": [],\n    \"next_action\": \"Подготовить тест пересказа прав доступа; не анализировать retention\",\n    \"open_questions\": [\n      \"Понимает ли читатель разницу просмотра и редактирования?\"\n    ],\n    \"pending\": [\n      {\n        \"id\": \"TEST-COMPREHENSION\",\n        \"status\": \"not_started\"\n      }\n    ],\n    \"stage\": \"paused\"\n  },\n  \"budget\": {\n    \"elapsed_minutes\": 0,\n    \"spent\": 0,\n    \"unknown_cost_attempts\": 0\n  },\n  \"validation\": {\n    \"valid\": true,\n    \"errors\": [],\n    \"warnings\": [],\n    \"revision\": 5,\n    \"sources\": 2,\n    \"claims\": 1,\n    \"scope\": \"Структура, цитаты, хеши и ссылки; не экспертная оценка истинности и качества стратегии\"\n  },\n  \"note\": \"Восстановлено из файлов; журнал и первоисточники доступны. Новое исследование не выполнялось.\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p . audit",
+        "started_at": "2026-11-04T10:24:21.384345+00:00",
+        "exit_code": 0,
+        "stdout": "{\n  \"valid\": true,\n  \"files\": 146,\n  \"findings\": [],\n  \"limits\": \"Эвристика; изображения/видео требуют визуального контроля, произвольные ПДн не гарантируются\"\n}\n",
+        "stderr": ""
+      },
+      {
+        "command": "python -m strategist -p projects/demo analyze SRC-4193cc7c15c57c2d",
+        "exit_code": 2,
+        "expected_exit_code": 2,
+        "stdout": "{\n  \"source_id\": \"SRC-4193cc7c15c57c2d\",\n  \"source_sha256\": \"4193cc7c15c57c2dad9dfe168f944f432eebb523ae27309c81db821c772a37be\",\n  \"method\": \"sum(retained)/sum(eligible) по периоду\",\n  \"groups\": {\n    \"2026-01\": {\n      \"eligible\": 400,\n      \"retained\": 240,\n      \"cohorts\": [\n        \"small\",\n        \"small\"\n      ],\n      \"rate\": 0.6\n    },\n    \"Feb\": {\n      \"eligible\": 200,\n      \"retained\": 90,\n      \"cohorts\": [\n        \"small\"\n      ],\n      \"rate\": 0.45\n    }\n  },\n  \"quality_errors\": [\n    \"row:3: несогласованный период (нужен YYYY-MM)\",\n    \"row:4: пропуски\",\n    \"row:5: дубликат period/cohort\",\n    \"Состав когорт различается; сравнение требует стандартизации\"\n  ],\n  \"valid\": false,\n  \"limits\": \"Ассоциация, не причинность; определение метрики и окно наблюдения проверяет агент\",\n  \"at\": \"2026-11-04T10:24:21.996205+00:00\"\n}\n",
+        "stderr": ""
+      }
+    ],
+    "note": "CLI/структурные тесты, не независимая экспертиза стратегии"
+  }
+}
